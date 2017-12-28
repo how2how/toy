@@ -5,7 +5,7 @@
 # @Last Modified time: 2017-01-19 12:47:24
 
 import os
-from packages.test import run as info
+from .packages.test import run as info
 
 
 def run(**args):
