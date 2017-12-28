@@ -25,11 +25,11 @@ task_queue = Queue.Queue()
 
 
 def connect_github():
-    gh = login(username='how2how', password='WWW.github.c0m')
+    gh = login(username='username', password='password')
     if not gh:
         raise Exception()
     print gh.user()
-    repo = gh.repository('how2how', 'toy')
+    repo = gh.repository('username', 'toy')
     print repo
     branch = repo.branch('master')
 
