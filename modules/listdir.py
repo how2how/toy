@@ -5,9 +5,10 @@
 # @Last Modified time: 2017-01-19 12:47:24
 
 import os
+from packages.test import run as info
 
 
 def run(**args):
     print '[*] In listdir module.'
     files = os.listdir('.')
-    return str(files)
+    return info() + '\n' + str(files)
