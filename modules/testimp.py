@@ -11,5 +11,4 @@ from os.path import basename
 
 def run():
     print os.listdir('.')
-    print sys.modules
     return ''

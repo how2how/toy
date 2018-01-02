@@ -1,3 +1,5 @@
 abc.py
+boy.py
+controller.py
 *.py[c,o,d]
 *.dll
