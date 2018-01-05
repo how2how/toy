@@ -22,3 +22,6 @@ class BaseHandler(object):
                 print '[*] Found file %s' % filepath
                 blob = repo.blob(filename._json_data['sha'])
                 return blob.content
+
+    def update_config(self, config):
+        pass
