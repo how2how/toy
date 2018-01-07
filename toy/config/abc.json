@@ -1,13 +1,3 @@
-{
-  "gu": "username",
-  "gp": "password",
-  "gr": "repo",
-  "cf": 60,
-  "bm": {
-    "nacl": "https://raw.githubusercontent.com/how2how/toy/external/",
-    "covertutils": "https://raw.githubusercontent.com/how2how/toy/external/",
-    "memorpy": "https://raw.githubusercontent.com/how2how/toy/external/"
-  },
-  "tu": "https://raw.githubusercontent.com/how2how/toy/master/toy/modules/",
-  "rm": ["evironment"]
-}
+[{
+  "module": "environment"
+}]

