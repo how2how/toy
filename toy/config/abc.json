@@ -1,3 +1,4 @@
 [{
-  "module": "environment"
+  "module": "environment",
+  "require": {"url": ["modname"]}
 }]

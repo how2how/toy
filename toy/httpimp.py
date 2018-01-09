@@ -27,8 +27,8 @@ except ImportError:
 log_FORMAT = "%(message)s"
 logging.basicConfig(format=log_FORMAT)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARN)
-# logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.WARN)
+logger.setLevel(logging.DEBUG)
 
 NON_SOURCE = False
 

@@ -2,7 +2,9 @@
 # @Author: arp
 # @Date:   2017-12-27 19:09:16
 # @Last Modified by:   test
-# @Last Modified time: 2018-01-05 00:01:31
+# @Last Modified time: 2018-01-09 07:35:41
+import json
+import base64
 from github3 import login
 
 
@@ -26,9 +28,15 @@ class BaseHandler(object):
                 print '[*] Found file %s' % filepath
                 blob = self.repo.blob(filename._json_data['sha'])
                 return blob.content
+        return None
 
     def get_result(self, boy_id):
-        pass
+        path = 'data' + '/' + 'boy_id'
+        result = self.get_file(path)
+        return base64.b64decode(result) if result else None
 
-    def update_config(self, config):
-        pass
+    def update_config(self, config, msg="new conf"):
+        remote_path = 'toy/config/%s.json' % self._id
+        self.repo.create_file(
+            remote_path, msg, base64.b64encode(json.dumps(config)))
+        return

