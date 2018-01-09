@@ -3,6 +3,6 @@
 
 import sys
 if sys.platform=="win32":
-    from WinStructures import *
+    from memorpy.WinStructures import *
 else:
-    from LinStructures import *
+    from memorpy.LinStructures import *

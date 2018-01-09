@@ -15,12 +15,11 @@
 # along with memorpy.  If not, see <http://www.gnu.org/licenses/>.
 
 import copy
-import time
-from Address import Address
+from memorpy.Address import Address
 import struct
 
 class Locator(object):
-    """ 
+    """
             take a memoryworker and a type to search
             then you can feed the locator with values and it will reduce the addresses possibilities
     """

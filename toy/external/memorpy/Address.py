@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with memorpy.  If not, see <http://www.gnu.org/licenses/>.
 
-import utils
+from memorpy import utils
 
 class AddressException(Exception):
     pass

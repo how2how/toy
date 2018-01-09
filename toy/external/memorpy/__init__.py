@@ -15,18 +15,18 @@
 # along with memorpy.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import logging
-logger=logging.getLogger("memorpy")
-logger.setLevel(logging.WARNING)
-ch = logging.StreamHandler()
-ch.setLevel(logging.WARNING)
-logger.addHandler(ch)
+# import logging
+# logger=logging.getLogger("memorpy")
+# logger.setLevel(logging.WARNING)
+# ch = logging.StreamHandler()
+# ch.setLevel(logging.WARNING)
+# logger.addHandler(ch)
 
-import sys
-from memorpy.MemWorker import *
-from memorpy.Locator import *
-from memorpy.Address import *
-from memorpy.Process import *
-from memorpy.utils import *
+# import sys
+# from memorpy.MemWorker import *
+# from memorpy.Locator import *
+# from memorpy.Address import *
+# from memorpy.Process import *
+# from memorpy.utils import *
 #if sys.platform=="win32":
 #    from wintools import *  #not a necessary dependency, just used for debugging

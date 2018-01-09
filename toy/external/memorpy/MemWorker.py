@@ -13,18 +13,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with memorpy.  If not, see <http://www.gnu.org/licenses/>.
-import sys
-import string
 import re
 import logging
-import Process
-import utils
+from memorpy import Process
+from memorpy import utils
 import struct
-from Address import Address
-from BaseProcess import ProcessException
+from memorpy.Address import Address
+from memorpy.BaseProcess import ProcessException
 import traceback
 import binascii
-from structures import *
+from memorpy.structures import *
 
 logger = logging.getLogger('memorpy')
 
@@ -132,17 +130,17 @@ class MemWorker(object):
             index = b.find(value, index + 1)
 
     def mem_search(self, value, ftype = 'match', protec = PAGE_READWRITE | PAGE_READONLY, optimizations=None, start_offset = None, end_offset = None):
-        """ 
+        """
                 iterator returning all indexes where the pattern has been found
         """
-        
+
         # pre-compile regex to run faster
         if ftype == 're' or ftype == 'groups' or ftype == 'ngroups':
-            
+
             # value should be an array of regex
             if type(value) is not list:
                 value = [value]
-            
+
             tmp = []
             for reg in value:
                 if type(reg) is tuple:
@@ -168,8 +166,8 @@ class MemWorker(object):
 
         # different functions avoid if statement before parsing the buffer
         if ftype == 're':
-            func = self.parse_re_function        
-        
+            func = self.parse_re_function
+
         elif ftype == 'groups':
             func = self.parse_groups_function
 

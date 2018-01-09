@@ -2,12 +2,12 @@
 # -*- coding: UTF8 -*-
 
 import sys
-from BaseProcess import *
+# from memorpy.BaseProcess import *
 if sys.platform=='win32':
-    from WinProcess import WinProcess as Process
+    from memorpy.WinProcess import WinProcess as Process
 elif sys.platform=='darwin':
-    from OSXProcess import OSXProcess as Process
+    from memorpy.OSXProcess import OSXProcess as Process
 elif 'sunos' in sys.platform:
-    from SunProcess import SunProcess as Process
+    from memorpy.SunProcess import SunProcess as Process
 else:
-    from LinProcess import LinProcess as Process
+    from memorpy.LinProcess import LinProcess as Process

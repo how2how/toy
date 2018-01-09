@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF8 -*-
 
-import utils
+from memorpy import utils
 import struct
 
 """ Base class for process not linked to any platform """
@@ -58,5 +58,5 @@ class BaseProcess(object):
             return self.write_bytes(int(address), struct.pack(s, data))
         else:
             return self.write_bytes(int(address), data)
-   
+
 
