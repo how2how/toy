@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
-sys.path.remove('')
+print sys.path
+# sys.path.remove('')
 import json
 import time
 import base64
