@@ -1,66 +1,68 @@
 # -*- encoding: utf-8 -*-
 from json import loads, dumps
-from urllib import urlencode
 from urllib2 import Request, urlopen
+import logging
+fmt = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=fmt)
 
-GH_API = 'https://api.github.com/'
 
-
-def request(method='GET', url='https://api.github.com',
-            data=None, headers=None):
-    if data:
-        data = urlencode(data)
-    if method is 'GET' and data is not None:
-        url += '?' + data
-        data = None
+def _request(method='GET', uri=None, data=None, headers=None):
+    url = 'https://api.github.com'
+    url = uri if url in uri else (url + uri)
     req = Request(url)
     req.headers = {'User-Agent': 'github-api',
                    'Accept': 'application/vnd.github.v3+json'}
     if headers:
         req.headers.update(headers)
     req.get_method = lambda: method
-    data = dumps(data, ensure_ascii=False)
-    print data
+    if data:
+        data = dumps(data, ensure_ascii=False)
     try:
-        print 'start to request'
+        logging.info('Start to request: %s' % url)
+        logging.debug('Request data: %s' % data)
         rsp = urlopen(req, data)
     except Exception as e:
-        print e
+        logging.exception(e)
         rsp = None
     return rsp
 
 
-def auth_reqest(user, password, method='GET',
-                url='https://api.github.com',
+def auth_reqest(user, password, method='GET', uri=None,
                 data=None, headers=None):
     auth_hash = ':'.join((user, password)).encode('base64').strip()
     headers = headers or {}
     headers.update({'Authorization': 'Basic ' + auth_hash})
-    return request(method=method, url=url, data=data, headers=headers)
+    return _request(method=method, uri=uri, data=data, headers=headers)
 
 
-def token_request(token, method='GET', url='https://api.github.com',
-                  data=None, headers=None):
+def token_request(token, method='GET', uri=None, data=None, headers=None):
     headers = headers or {}
     headers.update({'Authorization': 'token ' + token})
-    return request(method=method, url=url, data=data, headers=headers)
+    return _request(method=method, uri=uri, data=data, headers=headers)
+
+
+def request(upot, method='GET', uri=None, data=None, headers=None):
+    if ':' in upot:
+        user, password = upot.split(':', 1)
+        return auth_reqest(user, password, method, uri, data, headers)
+    return token_request(upot, method, uri, data, headers)
 
 
 def put(token, content, path, repo, owner, msg='new file'):
     """
     PUT /repos/:owner/:repo/contents/:path
     """
-    url = 'https://api.github.com/repos/%s/%s/contents/%s' % (owner, repo, path)
+    uri = '/repos/%s/%s/contents/%s' % (owner, repo, path)
     data = {'message': msg, 'content': content.encode('base64')}
-    return token_request(token, 'PUT', url, data)
+    return request(token, 'PUT', uri, data)
 
 
 def get(token, path, repo, owner):
     """
     GET /repos/:owner/:repo/contents/:path
     """
-    url = 'https://api.github.com/repos/%s/%s/contents/%s' % (owner, repo, path)
-    rsp = token_request(token, url=url)
+    uri = '/repos/%s/%s/contents/%s' % (owner, repo, path)
+    rsp = request(token, uri=uri)
     content = loads(rsp.read().strip()) if rsp else {}
     return content.get('content', '').decode('base64'), content
 
@@ -69,15 +71,27 @@ def update(token, content, path, sha, repo, owner, msg='update file'):
     """
     PUT /repos/:owner/:repo/contents/:path
     """
-    url = 'https://api.github.com/repos/%s/%s/contents/%s' % (owner, repo, path)
+    uri = '/repos/%s/%s/contents/%s' % (owner, repo, path)
     data = {'message': msg, 'content': content.encode('base64'), 'sha': sha}
-    return token_request(token, 'PUT', url, data)
+    return request(token, 'PUT', uri, data)
 
 
 def delete(token, path, sha, repo, owner, msg='delete file'):
     """
     DELETE /repos/:owner/:repo/contents/:path
     """
-    url = 'https://api.github.com/repos/%s/%s/contents/%s' % (owner, repo, path)
+    uri = '/repos/%s/%s/contents/%s' % (owner, repo, path)
     data = {'message': msg, 'sha': sha}
-    return token_request(token, 'DELETE', url, data)
+    return request(token, 'DELETE', uri, data)
+
+
+def get_raw(path, repo, owner, branch='master'):
+    raw_url = 'https://raw.githubusercontent.com'
+    uri = '/%s/%s/%s/%s' % (owner, repo, branch, path)
+    url = raw_url + uri
+    try:
+        rsp = urlopen(url).read()
+    except Exception as e:
+        logging.exception(e)
+        rsp = ''
+    return rsp

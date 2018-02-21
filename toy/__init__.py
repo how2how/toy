@@ -2,4 +2,5 @@
 # @Author: test
 # @Date:   2018-01-04 22:25:46
 # @Last Modified by:   test
-# @Last Modified time: 2018-01-04 22:25:50
+# @Last Modified time: 2018-02-22 00:25:18
+from toy.boy import Boy

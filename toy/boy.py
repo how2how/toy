@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 print sys.path
-# sys.path.remove('')
 import json
 import time
 import base64
@@ -14,6 +13,12 @@ try:
     from urllib2 import urlopen
 except ImportError:
     from urllib.request import urlopen
+import logging
+log_FORMAT = "%(message)s"
+logging.basicConfig(format=log_FORMAT)
+logger = logging.getLogger(__name__)
+# logger.setLevel(logging.WARN)
+logger.setLevel(logging.DEBUG)
 
 
 class Boy(object):
@@ -128,6 +133,7 @@ class Boy(object):
 
     def run(self):
         self.install()
+        print ''
         while True:
             if self.task_queue.empty():
                 tasks = self.get_task(self.task_url + self._id + '.json')
