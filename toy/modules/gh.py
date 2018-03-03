@@ -1,6 +1,10 @@
 # -*- encoding: utf-8 -*-
 from json import loads, dumps
-from urllib2 import Request, urlopen
+# from urllib2 import Request, urlopen
+try:
+    from urllib2 import urlopen, Request
+except ImportError:
+    from urllib.request import urlopen, Request
 import logging
 fmt = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=fmt)
@@ -48,7 +52,7 @@ def request(upot, method='GET', uri=None, data=None, headers=None):
     return token_request(upot, method, uri, data, headers)
 
 
-def put(token, content, path, repo, owner, msg='new file'):
+def put(owner, token, repo, path, content, msg='new file'):
     """
     PUT /repos/:owner/:repo/contents/:path
     """
@@ -57,7 +61,7 @@ def put(token, content, path, repo, owner, msg='new file'):
     return request(token, 'PUT', uri, data)
 
 
-def get(token, path, repo, owner):
+def get(owner, token, repo, path):
     """
     GET /repos/:owner/:repo/contents/:path
     """
@@ -67,7 +71,7 @@ def get(token, path, repo, owner):
     return content.get('content', '').decode('base64'), content
 
 
-def update(token, content, path, sha, repo, owner, msg='update file'):
+def update(owner, token, repo, path, content, sha, msg='update file'):
     """
     PUT /repos/:owner/:repo/contents/:path
     """
@@ -76,7 +80,7 @@ def update(token, content, path, sha, repo, owner, msg='update file'):
     return request(token, 'PUT', uri, data)
 
 
-def delete(token, path, sha, repo, owner, msg='delete file'):
+def delete(owner, token, repo, path, sha, msg='delete file'):
     """
     DELETE /repos/:owner/:repo/contents/:path
     """
@@ -85,10 +89,13 @@ def delete(token, path, sha, repo, owner, msg='delete file'):
     return request(token, 'DELETE', uri, data)
 
 
-def get_raw(path, repo, owner, branch='master'):
-    raw_url = 'https://raw.githubusercontent.com'
-    uri = '/%s/%s/%s/%s' % (owner, repo, branch, path)
-    url = raw_url + uri
+def get_raw(path, owner=None, repo=None, branch='master'):
+    if path.startswith('http'):
+        url = path
+    else:
+        raw_url = 'https://raw.githubusercontent.com'
+        uri = '/%s/%s/%s/%s' % (owner, repo, branch, path)
+        url = raw_url + uri
     try:
         rsp = urlopen(url).read()
     except Exception as e:

