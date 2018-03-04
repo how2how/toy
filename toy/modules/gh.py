@@ -68,7 +68,8 @@ def get(owner, token, repo, path):
     uri = '/repos/%s/%s/contents/%s' % (owner, repo, path)
     rsp = request(token, uri=uri)
     content = loads(rsp.read().strip()) if rsp else {}
-    return content.get('content', '').decode('base64'), content
+    # return content.get('content', '').decode('base64'), content
+    return content
 
 
 def update(owner, token, repo, path, content, sha, msg='update file'):
