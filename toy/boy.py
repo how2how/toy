@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # logger.setLevel(logging.WARN)
 logger.setLevel(logging.DEBUG)
 
-from httpimp import add_remote_repo, remove_remote_repo
+from toy.httpimp import add_remote_repo, remove_remote_repo
 add_remote_repo(
     ['toy'],
     'https://raw.githubusercontent.com/how2how/toy/master')
