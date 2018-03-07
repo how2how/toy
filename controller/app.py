@@ -11,7 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from tornado.options import define, options
 define("port", default=8000, help="run on the given port", type=int)
 
-from boy.modules import gh
+from toy.modules import gh
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -45,9 +45,6 @@ class ConfigHandler(BaseHandler):
     # @tornado.web.authenticated
     def get(self):
         self.render('config.html', title='Configure')
-
-    def post(self):
-        pass
 
     # @tornado.web.authenticated
     def post(self):
