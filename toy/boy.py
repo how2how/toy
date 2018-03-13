@@ -73,7 +73,7 @@ class Boy(object):
             add_remote_repo([module], url)
             exec "import %s" % module
         except Exception:
-            logging.error('Exception with import %s' % pkg)
+            logging.error('Exception with import %s' % module)
             pass
 
     @staticmethod
