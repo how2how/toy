@@ -88,7 +88,7 @@ class Boy(object):
                 pkgs = [pkgs]
             self.load(pkgs, url)
         for pkg in self.run_modules:
-            self.load_module(pkg)
+            self.load_module(pkg['module'])
         self.init = False
 
         # for m in self.run_modules:
@@ -112,6 +112,13 @@ class Boy(object):
         else:
             config = {}
         return config
+
+    @staticmethod
+    def parse_require(pkg):
+        requires = pkg.get('require', None)
+        if requires:
+            for k, v in requires.items():
+                self.load(v, k)
 
     def check(self, url=None):
         url = url or self.conf_url
