@@ -1,4 +1,7 @@
-[{
-  "module": "environment",
-  "require": {"url": ["modname"]}
-}]
+{
+    "name": "task",
+    "url": "url",
+    "task": [{"module": "environment",
+      "require": {"url": ["modname"]}
+    }]
+}

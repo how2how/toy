@@ -57,7 +57,7 @@ class CovertutilsHandler(BaseHandler):
 
 class ResultHandler(BaseHandler):
     def get(self):
-        data = gh.get('how2how', 'how2how:WWW.github.c0m', 'toy', 'data/')
+        data = gh.get('how2how', '50a3f305c02b74b49403404388d31d56ea976139', 'toy', 'data/')
         ret = dict(count=len(data), result=data)
         self.write(ret)
 
