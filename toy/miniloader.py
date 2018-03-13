@@ -10,9 +10,9 @@ add_remote_repo(
 #     ['nacl'],
 #     'https://raw.githubusercontent.com/pyca/pynacl/master/src/')
 from toy.boy import Boy
-import json
+# import json
 
-config = Boy.get_config(Boy.config_url + 'conf.json')
+config = Boy.get_config(Boy._url + 'conf.json')
 # config = json.load(open('../test_conf.json','rb'))
 b = Boy(config)
 b.run()
