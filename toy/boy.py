@@ -27,11 +27,13 @@ for i in sys.modules:
 
 class Boy(object):
     _id = 'abc'
-    _url = 'https://raw.githubusercontent.com/how2how/toy/master/toy/config/'
+    _url = 'https://raw.githubusercontent.com/how2how/toy/master/toy/config/conf.json'
+
     def __init__(self, config):
         self.task_queue = Queue.Queue()
         self.result_path = 'data/%s/' % self._id
         self.parse_conf(config)
+        self.init = True
 
     def parse_conf(self, config):
         self.guser = config.pop('gu', '')
@@ -85,6 +87,7 @@ class Boy(object):
             self.load(pkgs, url)
         for pkg in self.run_modules:
             self.load_module(pkg)
+        self.init = False
 
         # for m in self.run_modules:
         #     try:
@@ -158,11 +161,9 @@ class Boy(object):
         self.install()
         while True:
             if self.task_queue.empty():
-                if self.task_url:
-                    tasks = self.load_task(self.task_url)
-                # tasks = self.get_task(self.task_url + self._id + '.json')
-                tasks = self.load_task()
-                for task in tasks:
+                if not self.init:
+                    self.check()
+                for task in self.run_modules:
                     logging.debug("run task %s" % task['module'])
                     mod = 'toy.modules.%s' % task['module']
                     try:
