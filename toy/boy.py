@@ -66,7 +66,7 @@ class Boy(object):
     #         data = None
     #     return data
 
-    @staticme + 'conf.json'thod
+    @staticmethod
     def load(module, url):
         try:
             logging.debug('Try to import module')
