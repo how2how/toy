@@ -27,7 +27,7 @@ for i in sys.modules:
 
 class Boy(object):
     _id = 'abc'
-
+    _url = 'https://github.com/how2how/toy/master/toy/config/'
     def __init__(self, config):
         self.task_queue = Queue.Queue()
         self.result_path = 'data/%s/' % self._id
