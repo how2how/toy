@@ -12,7 +12,7 @@ add_remote_repo(
 from toy.boy import Boy
 # import json
 
-config = Boy.get_config(Boy._url + 'conf.json')
+config = Boy.get_config(Boy._url)
 # config = json.load(open('../test_conf.json','rb'))
 b = Boy(config)
 b.run()

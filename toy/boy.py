@@ -66,6 +66,7 @@ class Boy(object):
     #         data = None
     #     return data
 
+    @staticme + 'conf.json'thod
     def load(module, url):
         try:
             logging.debug('Try to import module')
@@ -75,6 +76,7 @@ class Boy(object):
             logging.error('Exception with import %s' % pkg)
             pass
 
+    @staticmethod
     def unload(module, url):
         remove_remote_repo(url)
         if module in sys.modules:
@@ -120,14 +122,14 @@ class Boy(object):
         tasks = self.load_task(self.task_url) if self.task_url else []
         self.run_modules += tasks
 
+    @staticmethod
     def load_module(mod, pkg='toy.modules'):
         try:
             exec "from %s import " % (pkg, mod)
         except Exception:
             logging.error("Import %s error" % '.'.join((pkg, mod)))
 
-    @staticmethod
-    def load_task(task_url):
+    def load_task(self, task_url):
         tasks = gh.get_raw(task_url)
         if tasks:
             tasks = json.loads(tasks)
