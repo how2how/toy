@@ -132,7 +132,8 @@ class Boy(object):
     @staticmethod
     def load_module(mod, pkg='toy.modules'):
         try:
-            exec "from %s import " % (pkg, mod)
+            logging.debug('Import %s from %s' % (mod, pkg))
+            exec "from %s import %s" % (pkg, mod)
         except Exception:
             logging.error("Import %s error" % '.'.join((pkg, mod)))
 
