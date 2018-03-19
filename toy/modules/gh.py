@@ -59,6 +59,7 @@ def put(owner, token, repo, path, content, msg='new file'):
     """
     uri = '/repos/%s/%s/contents/%s' % (owner, repo, path)
     data = {'message': msg, 'content': content.encode('base64')}
+    logging.info('[*] Save result to %s' % path)
     return request(token, 'PUT', uri, data)
 
 
@@ -99,6 +100,7 @@ def get_raw(path, owner=None, repo=None, branch='master'):
         uri = '/%s/%s/%s/%s' % (owner, repo, branch, path)
         url = raw_url + uri
     try:
+        logging.info('[*] Get raw data from %s' % url)
         rsp = urlopen(url).read()
     except Exception as e:
         logging.exception(e)
