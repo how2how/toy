@@ -85,7 +85,7 @@ class Boy(object):
             if not isinstance(pkgs, (list, tuple)):
                 pkgs = [pkgs]
             for p in pkgs:
-                self.load([p], url)
+                self.load(p, url)
         for pkg in self.run_modules:
             self.load_module(pkg['module'])
         self.init = False
