@@ -25,7 +25,7 @@ except ImportError:
     from urllib.request import urlopen
 
 # log_FORMAT = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
-log_FORMAT = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
+log_FORMAT = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s] %(message)s '
 logging.basicConfig(format=log_FORMAT)
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.WARN)

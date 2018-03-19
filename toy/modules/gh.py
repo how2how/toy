@@ -7,7 +7,7 @@ except ImportError:
     from urllib.request import urlopen, Request
 import logging
 # fmt = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
-fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
+fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s ] %(message)s '
 logging.basicConfig(level=logging.INFO, format=fmt)
 
 
