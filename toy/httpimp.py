@@ -68,13 +68,13 @@ class HttpImporter(object):
         logger.debug("LOADER=================")
         logger.debug("[+] Loading %s" % name)
         if name in sys.modules:
-            logger.debug('[+] Module "%s" already loaded!' % name)
+            logger.info('[+] Module "%s" already loaded!' % name)
             imp.release_lock()
             return sys.modules[name]
 
         if name.split('.')[-1] in sys.modules:
             imp.release_lock()
-            logger.debug('[+] Module "%s" loaded as a top level module!' % name)
+            logger.info('[+] Module "%s" loaded as a top level module!' % name)
             return sys.modules[name.split('.')[-1]]
 
         module_url = self.base_url + '%s.py' % name.replace('.', '/')
@@ -112,7 +112,7 @@ class HttpImporter(object):
                 imp.release_lock()
                 return None
 
-        logger.debug("[+] Importing '%s'" % name)
+        logger.info("[+] Importing '%s'" % name)
         mod = imp.new_module(name)
         mod.__loader__ = self
         mod.__file__ = final_url
@@ -125,7 +125,7 @@ class HttpImporter(object):
         logger.debug("[+] Ready to execute '%s' code" % name)
         sys.modules[name] = mod
         exec(final_src, mod.__dict__)
-        logger.debug("[+] '%s' imported succesfully!" % name)
+        logger.info("[+] '%s' imported succesfully!" % name)
         imp.release_lock()
         return mod
 

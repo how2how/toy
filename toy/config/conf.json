@@ -4,7 +4,7 @@
   "gr": "toy",
   "cf": 60,
   "bm": {
-      "https://raw.githubusercontent.com/how2how/toy/master/toy/external/": ["toy", "nacl", "covertutils", "memorpy"]
+      "https://raw.githubusercontent.com/how2how/toy/master/toy/external/": ["nacl", "covertutils", "memorpy"]
   },
   "cu": "https://raw.githubusercontent.com/how2how/toy/master/toy/config/conf.json",
   "tu": "https://raw.githubusercontent.com/how2how/toy/master/toy/modules/",
