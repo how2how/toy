@@ -24,11 +24,12 @@ try:
 except ImportError:
     from urllib.request import urlopen
 
-log_FORMAT = "%(message)s"
+# log_FORMAT = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
+log_FORMAT = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
 logging.basicConfig(format=log_FORMAT)
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.WARN)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 NON_SOURCE = False
 
@@ -44,22 +45,22 @@ class HttpImporter(object):
         logger.debug("FINDER=================")
         logger.debug("[!] Searching %s" % fullname)
         logger.debug("[!] Path is %s" % path)
-        logger.info("[@]Checking if in domain >")
+        logger.debug("[@]Checking if in domain >")
         if fullname.split('.')[0] not in self.module_names:
             return None
 
-        logger.info("[@]Checking if built-in >")
+        logger.debug("[@]Checking if built-in >")
         try:
             loader = imp.find_module(fullname, path)
             if loader:
                 return None
         except ImportError:
             pass
-        logger.info("[@]Checking if it is name repetition >")
+        logger.debug("[@]Checking if it is name repetition >")
         if fullname.split('.').count(fullname.split('.')[-1]) > 1:
             return None
 
-        logger.info("[*]Module/Package '%s' can be loaded!" % fullname)
+        logger.debug("[*]Module/Package '%s' can be loaded!" % fullname)
         return self
 
     def load_module(self, name):
@@ -67,13 +68,13 @@ class HttpImporter(object):
         logger.debug("LOADER=================")
         logger.debug("[+] Loading %s" % name)
         if name in sys.modules:
-            logger.info('[+] Module "%s" already loaded!' % name)
+            logger.debug('[+] Module "%s" already loaded!' % name)
             imp.release_lock()
             return sys.modules[name]
 
         if name.split('.')[-1] in sys.modules:
             imp.release_lock()
-            logger.info('[+] Module "%s" loaded as a top level module!' % name)
+            logger.debug('[+] Module "%s" loaded as a top level module!' % name)
             return sys.modules[name.split('.')[-1]]
 
         module_url = self.base_url + '%s.py' % name.replace('.', '/')
@@ -92,7 +93,7 @@ class HttpImporter(object):
             final_url = package_url
         except IOError as e:
             package_src = None
-            logger.info("[-] '%s' is not a package:" % name)
+            logger.debug("[-] '%s' is not a package:" % name)
 
         if final_src is None:
             try:
@@ -106,7 +107,7 @@ class HttpImporter(object):
                 final_url = module_url
             except IOError as e:
                 module_src = None
-                logger.info("[-] '%s' is not a module:" % name)
+                logger.debug("[-] '%s' is not a module:" % name)
                 logger.warning("[!] '%s' not found in HTTP repository. Moving to next Finder." % name)
                 imp.release_lock()
                 return None
@@ -124,7 +125,7 @@ class HttpImporter(object):
         logger.debug("[+] Ready to execute '%s' code" % name)
         sys.modules[name] = mod
         exec(final_src, mod.__dict__)
-        logger.info("[+] '%s' imported succesfully!" % name)
+        logger.debug("[+] '%s' imported succesfully!" % name)
         imp.release_lock()
         return mod
 
