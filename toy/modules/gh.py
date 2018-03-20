@@ -15,7 +15,7 @@ def _request(method='GET', uri=None, data=None, headers=None):
     url = 'https://api.github.com'
     url = uri if url in uri else (url + uri)
     req = Request(url)
-    req.headers = {'User-Agent': 'github-api',
+    req.headers = {'User-Agent': 'Test-App',
                    'Accept': 'application/vnd.github.v3+json'}
     if headers:
         req.headers.update(headers)
