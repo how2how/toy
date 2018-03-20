@@ -1,5 +1,5 @@
 # Simple Loader
-from httpimp import add_remote_repo
+from ghimp import add_remote_repo
 add_remote_repo(
     ['toy'],
     'https://raw.githubusercontent.com/how2how/toy/master')

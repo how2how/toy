@@ -1,37 +1,40 @@
-'''
-Copyright 2017 John Torakis
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-'''
-
+# -*- encoding: utf-8 -*-
 import imp
 import sys
-import logging
-
 from contextlib import contextmanager
+from json import loads, dumps
+# from urllib2 import Request, urlopen
 try:
     from urllib2 import urlopen, Request
 except ImportError:
     from urllib.request import urlopen, Request
 
-# log_FORMAT = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
-log_FORMAT = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s] %(message)s '
-logging.basicConfig(format=log_FORMAT)
+import logging
+# fmt = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
+fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s ] %(message)s '
+logging.basicConfig(format=fmt)
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.WARN)
 logger.setLevel(logging.INFO)
 
+
 NON_SOURCE = False
+
+
+def get_raw(url, headers=None):
+    req = Request(url)
+    req.headers = {'User-Agent': 'Test-App',
+                   'Accept': 'application/vnd.github.v3+json'}
+    if headers:
+        req.headers.update(headers)
+    try:
+        logger.info('Start to request: %s' % url)
+        rsp = urlopen(req).read()
+    except Exception as e:
+        logger.error('[-] Request error: %s' % url)
+        logger.exception(e)
+        rsp = ''
+    return rsp
 
 
 class HttpImporter(object):
@@ -150,15 +153,6 @@ class HttpImporter(object):
         except IOError as e:
             logger.debug("[-] No compiled version ('.pyc') for '%s' module found!" % url.split('/')[-1])
         return module_src
-
-
-def get_raw(url, headers=None):
-    req = Request(url)
-    req.headers = {'User-Agent': 'Test-App',
-                   'Accept': 'application/vnd.github.v3+json'}
-    if headers:
-        req.headers.update(headers)
-    return urlopen(req).read()
 
 
 @contextmanager
