@@ -138,6 +138,7 @@ class Boy(object):
 
     def load_task(self, task_url):
         tasks = gh.get_raw(task_url)
+        logging.info('[+] Get task config: %s' % tasks)
         if tasks:
             tasks = json.loads(tasks)
             logging.info('[*] Get task %s from %s' % (tasks['name'], task_url))
