@@ -103,6 +103,7 @@ def get_raw(path, owner=None, repo=None, branch='master'):
         logging.info('[*] Get raw data from %s' % url)
         rsp = urlopen(url).read()
     except Exception as e:
+        logging.error('[-] Get error from %s' % url)
         logging.exception(e)
         rsp = ''
     return rsp

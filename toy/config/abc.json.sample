@@ -1,0 +1,7 @@
+{
+    "name": "task",
+    "url": "url",
+    "task": [{"module": "listdir",
+              "require": {"url": ["modname"]}}
+  ]
+}

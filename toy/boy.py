@@ -140,6 +140,12 @@ class Boy(object):
         tasks = gh.get_raw(task_url)
         if tasks:
             tasks = json.loads(tasks)
+            logging.info('[*] Get task %s from %s' % (tasks['name'], task_url))
+            requires = tasks.get('require', {})
+            for u, p in requires.items():
+                for k in p:
+                    logging.info('[*] Load required packages: %s from %s' % (k, u))
+                    self.load([k], u)
             self.load(tasks['name'], tasks['url'])
             for task in tasks['task']:
                 self.load_module(task['module'], tasks['name'] + '.modules')
