@@ -88,7 +88,8 @@ class HttpImporter(object):
             if self.non_source:
                 package_src = self.__fetch_compiled(package_url)
             if package_src is None:
-                package_src = urlopen(package_url).read()
+                # package_src = urlopen(package_url).read()
+                package_src = self.get_raw(package_url)
             final_src = package_src
             final_url = package_url
         except IOError as e:
@@ -102,7 +103,8 @@ class HttpImporter(object):
                 if self.non_source:
                     module_src = self.__fetch_compiled(module_url)
                 if module_src is None:
-                    module_src = urlopen(module_url).read()
+                    # module_src = urlopen(module_url).read()
+                    module_src = self.get_raw(module_url)
                 final_src = module_src
                 final_url = module_url
             except IOError as e:
@@ -133,7 +135,8 @@ class HttpImporter(object):
         import marshal
         module_src = None
         try:
-            module_compiled = urlopen(url + 'c').read()
+            # module_compiled = urlopen(url + 'c').read()
+            module_compiled = self.get_raw(url + 'c')
             try:
                 module_src = marshal.loads(module_compiled[8:])
                 return module_src
@@ -147,6 +150,13 @@ class HttpImporter(object):
         except IOError as e:
             logger.debug("[-] No compiled version ('.pyc') for '%s' module found!" % url.split('/')[-1])
         return module_src
+
+    def get_raw(url, headers=None):
+        req = Request(url)
+        req.headers = {'User-Agent': 'Test-App'}
+        if headers:
+            req.headers.update(headers)
+        return urlopen(req).read()
 
 
 @contextmanager
