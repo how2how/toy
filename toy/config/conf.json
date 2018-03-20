@@ -7,7 +7,7 @@
       "https://raw.githubusercontent.com/how2how/toy/master/toy/external/": ["nacl", "covertutils", "memorpy"]
   },
   "cu": "https://raw.githubusercontent.com/how2how/toy/master/toy/config/conf.json",
-  "tu": "https://raw.githubusercontent.com/how2how/toy/master/toy/config/",
+  "tu": "https://raw.githubusercontent.com/how2how/toy/master/toy/config/abc.json",
   "rm": [{
       "module": "environment",
       "require": {"url": ["modname"]}
