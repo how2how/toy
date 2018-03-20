@@ -27,6 +27,7 @@ def _request(method='GET', uri=None, data=None, headers=None):
         logging.debug('Request data: %s' % data)
         rsp = urlopen(req, data)
     except Exception as e:
+        logging.error('[-] Request error: %s' % url)
         logging.exception(e)
         rsp = None
     return rsp

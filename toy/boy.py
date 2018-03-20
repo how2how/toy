@@ -25,6 +25,7 @@ from toy.modules import gh
 
 class Boy(object):
     _id = 'abc'
+    _group = 'default'
     _url = 'https://raw.githubusercontent.com/how2how/toy/master/toy/config/conf.json'
 
     def __init__(self, config):
@@ -171,6 +172,7 @@ class Boy(object):
         self.task_queue.get()
         if result:
             logger.info('[*] Get result: %s' % result)
+            time.sleep(5)
             gh.put(self.guser, self.gtoken, self.grepo, path, result)
         if not loop:
             del sys.modules[m]
