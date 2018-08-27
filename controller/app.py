@@ -5,6 +5,7 @@ import tornado.websocket
 import tornado.options
 import os.path
 import sys
+import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -29,9 +30,9 @@ class LoginHandler(BaseHandler):
 
 
 class WelcomeHandler(BaseHandler):
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     def get(self):
-        self.render('index.html', user=self.current_user)
+        self.render('main.html', user=self.current_user)
 
 
 class LogoutHandler(BaseHandler):
@@ -39,6 +40,20 @@ class LogoutHandler(BaseHandler):
         if (self.get_argument("logout", None)):
             self.clear_cookie("username")
             self.redirect("/")
+
+
+class SystemHandler(BaseHandler):
+    settings = json.load(open('settings.conf', 'rb'))
+
+    def get(self):
+        print(settings)
+        self.render('system.html', settings=self.settings)
+
+    def post(self):
+        for k in self.settings.keys():
+            self.settings[k] = self.get_argument(k, self.settings[k])
+        print(self.settings)
+        json.dump(self.settings, open('settings.conf', 'w'))
 
 
 class ConfigHandler(BaseHandler):
@@ -96,9 +111,10 @@ if __name__ == "__main__":
     }
 
     application = tornado.web.Application([
-        (r'/', WelcomeHandler),
+        (r'/main', WelcomeHandler),
         (r'/login', LoginHandler),
         (r'/logout', LogoutHandler),
+        (r'/system', SystemHandler),
         (r'/config', ConfigHandler),
         (r'/covertutils', CovertutilsHandler),
         (r'/result', ResultHandler),
