@@ -32,7 +32,7 @@ def get_raw(url, headers=None):
         rsp = urlopen(req).read()
     except Exception as e:
         logger.error('[-] Request error: %s' % url)
-        logger.exception(e)
+        logger.debug(e)
         rsp = ''
     return rsp
 

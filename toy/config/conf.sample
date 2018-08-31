@@ -1,0 +1,15 @@
+{
+  "gu": "how2how",
+  "gt": "f90c89f1eed0742d8dc4bddcecba62118583a496",
+  "gr": "toy",
+  "cf": 60,
+  "bm": {
+      "http://localhost:8000/toy/external/": ["nacl", "covertutils", "memorpy"]
+  },
+  "cu": "http://localhost:8000/toy/config/conf.sample",
+  "tu": "http://localhost:8000/toy/config/abc.json",
+  "rm": [{
+      "module": "environment",
+      "require": {"require": {"http://localhost:8000/toy/common/Lib/": ["os"]}
+      }]
+}
