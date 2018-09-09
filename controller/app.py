@@ -12,10 +12,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from tornado.options import define, options
 define("port", default=8000, help="run on the given port", type=int)
 
-from toy.modules import gh
+from controller.utils import GithubApi as gh
 
 
 class BaseHandler(tornado.web.RequestHandler):
+    sysconf = json.load(open('config/system.conf', 'rb'))
+
     def get_current_user(self):
         return self.get_secure_cookie("username")
 
@@ -43,17 +45,15 @@ class LogoutHandler(BaseHandler):
 
 
 class SystemHandler(BaseHandler):
-    settings = json.load(open('settings.conf', 'rb'))
-
     def get(self):
         print(settings)
-        self.render('system.html', settings=self.settings)
+        self.render('system.html', settings=self.sysconf)
 
     def post(self):
         for k in self.settings.keys():
             self.settings[k] = self.get_argument(k, self.settings[k])
-        print(self.settings)
-        json.dump(self.settings, open('settings.conf', 'w'))
+
+        json.dump(self.sysconf, open('config/system.conf', 'w'))
 
 
 class ConfigHandler(BaseHandler):
@@ -72,7 +72,8 @@ class CovertutilsHandler(BaseHandler):
 
 class ResultHandler(BaseHandler):
     def get(self):
-        data = gh.get('how2how', '50a3f305c02b74b49403404388d31d56ea976139', 'toy', 'data/')
+        user, token, repo = self.sysconf['RetAccount'].split('$$')
+        data = gh.get(user, token, repo, self.sysconf['RetPath'])
         ret = dict(count=len(data), result=data)
         self.write(ret)
 
@@ -111,7 +112,7 @@ if __name__ == "__main__":
     }
 
     application = tornado.web.Application([
-        (r'/main', WelcomeHandler),
+        (r'/', WelcomeHandler),
         (r'/login', LoginHandler),
         (r'/logout', LogoutHandler),
         (r'/system', SystemHandler),
