@@ -1,4 +1,4 @@
 .idea/
 __pycache__/
-.pyc
+*.py[c,o]
 test_conf.json
