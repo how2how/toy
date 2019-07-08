@@ -88,8 +88,8 @@ class HttpImporter(object):
             if self.non_source:
                 package_src = self.__fetch_compiled(package_url)
             if package_src is None:
-                # package_src = urlopen(package_url).read()
-                package_src = get_raw(package_url)
+                package_src = urlopen(package_url).read()
+                # package_src = get_raw(package_url)
             final_src = package_src
             final_url = package_url
         except IOError as e:
@@ -103,8 +103,8 @@ class HttpImporter(object):
                 if self.non_source:
                     module_src = self.__fetch_compiled(module_url)
                 if module_src is None:
-                    # module_src = urlopen(module_url).read()
-                    module_src = get_raw(module_url)
+                    module_src = urlopen(module_url).read()
+                    # module_src = get_raw(module_url)
                 final_src = module_src
                 final_url = module_url
             except IOError as e:

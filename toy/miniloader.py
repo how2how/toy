@@ -2,8 +2,8 @@
 from ghimp import add_remote_repo
 add_remote_repo(
     ['toy'],
-    #'https://raw.githubusercontent.com/how2how/toy/master')
-    'http://localhost:8000')
+    'https://raw.githubusercontent.com/how2how/toy/master')
+    # 'http://localhost:8000')
 # add_remote_repo(
 #     ['covertutils'],
 #     'https://raw.githubusercontent.com/operatorequals/covertutils/master')
