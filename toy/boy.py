@@ -28,9 +28,10 @@ class Boy(object):
     _group = 'default'
     _url = 'https://raw.githubusercontent.com/how2how/toy/master/toy/config/conf.json'
 
-    def __init__(self, config):
+    def __init__(self):
         self.task_queue = Queue.Queue()
         self.result_path = 'data/%s/' % self._id
+        config = self.get_config(self._url)
         self.parse_conf(config)
         self.init = True
 
@@ -197,3 +198,7 @@ class Boy(object):
                         pass
             time.sleep(self.cf)
             # time.sleep(random.randint(1000, 10000))
+
+
+if __name__ == '__main__':
+    Boy()
